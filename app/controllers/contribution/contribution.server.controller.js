@@ -8,18 +8,18 @@ var is = require('is-js');
 var _ = require('lodash');
 
 var u = require('underscore');
-/*
-Gets the data from the frontend and
-saves it in the database.
-*/
+
+function errorJSON(res) {
+	return res.jsonp({
+		err: 'Post (create): Does not exist',
+		message: 'req.body.contribution was not sent',
+		changes: 'No Contribution Created'
+	});
+}
 
 exports.create = function(req, res) {
 	if (is.empty(req.body.contribution)) {
-		return res.jsonp({
-			err: 'Post (create): Does not exist',
-			message: 'req.body.contribution did not get sent to backend',
-			changes: 'No Contribution Created'
-		});
+		return errorJSON(res);
 	}
 
 	var contribution = new Contribution({
@@ -41,8 +41,6 @@ exports.create = function(req, res) {
 };
 
 exports.update = function(req, res) {
-	//console.log(require('util').inspect(req.body));
-	
 	if (is.empty(req.body.contribution)) {
 		res.status(400);
 		return res.jsonp({
@@ -103,6 +101,5 @@ exports.hasAuthorization = function(req, res, next) {
 			message: 'User is not authorized'
 		});
 	}
-
 	next();
 };
