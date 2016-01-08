@@ -45,6 +45,9 @@ exports.update = function(req, res) {
 		return errorJSON(res, 'Put', 'Updated');
 	}
 
+	console.log(req.user);
+	console.log(req.report);
+
 	var contribution = req.contribution;
 
 	contribution = _.extend(contribution, req.body.contribution);
