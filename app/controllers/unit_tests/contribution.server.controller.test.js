@@ -13,7 +13,7 @@ var testRes = {
     jsonp: function(obj) { return obj; }
 };
 
-describe('Contribution Tests', function() {
+describe('Contribution Create Tests', function() {
     it('should fail if the contribution body request is empty', function(done) {
         var error = contribution.create(testReq, testRes);
         should.exist(error.err);
@@ -22,7 +22,22 @@ describe('Contribution Tests', function() {
 
         should.equal(error.err, 'Post (create): Does not exist');
         should.equal(error.message, 'req.body.contribution was not sent');
-        should.equal(error.changes, 'No Contribution Created');
+        should.equal(error.changes, 'Nothing Created');
+
+        done();
+    });
+});
+
+describe('Contribution Update Tests', function() {
+    it('should fail if the contribution body request is empty', function(done) {
+        var error = contribution.update(testReq, testRes);
+        should.exist(error.err);
+        should.exist(error.message);
+        should.exist(error.changes);
+
+        should.equal(error.err, 'Put (update): Does not exist');
+        should.equal(error.message, 'req.body.contribution was not sent');
+        should.equal(error.changes, 'Nothing Updated');
 
         done();
     });

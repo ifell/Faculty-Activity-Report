@@ -9,17 +9,17 @@ var _ = require('lodash');
 
 var u = require('underscore');
 
-function errorJSON(res) {
+function errorJSON(res, type) {
 	return res.jsonp({
-		err: 'Post (create): Does not exist',
+		err: 'Post (' + type + '): Does not exist',
 		message: 'req.body.contribution was not sent',
-		changes: 'No Contribution Created'
+		changes: 'Nothing Created'
 	});
 }
 
 exports.create = function(req, res) {
 	if (is.empty(req.body.contribution)) {
-		return errorJSON(res);
+		return errorJSON(res, 'create');
 	}
 
 	var contribution = new Contribution({
@@ -42,11 +42,10 @@ exports.create = function(req, res) {
 
 exports.update = function(req, res) {
 	if (is.empty(req.body.contribution)) {
-		res.status(400);
 		return res.jsonp({
 			err: 'Put (update): Does not exist',
-			message: 'req.body.contribution did not get send to backend',
-			changes: 'No Changes Made'
+			message: 'req.body.contribution was not sent',
+			changes: 'Nothing Updated'
 		});
 	}
 
