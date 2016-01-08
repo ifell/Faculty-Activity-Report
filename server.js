@@ -48,7 +48,7 @@ User.find({username:'admin'}, function(err, results) {
 		console.log('More than one Root Admin is Defined!');
 		return;
 	}
-
+/*
 	if (results.length === 0) {
 		var user = new User({
 			firstName: 'FirstName',
@@ -67,5 +67,5 @@ User.find({username:'admin'}, function(err, results) {
 				console.log(err);
 			}
 		});
-	}
+	}*/
 });
