@@ -124,12 +124,6 @@ var ReportSchema = new Schema({
 	serviceToSchools: {
 		type: Schema.Types.ObjectId, ref: 'ServiceToSchools'
 	}
-
-//END TEMP-------------------------------------------------
-
-
-
-
 });
 
 mongoose.model('Report', ReportSchema);

@@ -9,44 +9,39 @@ var _ = require('lodash');
 
 var u = require('underscore');
 
-var errorJSON = exports.errorJSON = function(res, type, actionNotTaken) {
-	return res.jsonp({
-		err: type + ': Does not exist',
-		message: 'req.body.contribution was not sent',
-		changes: 'Nothing ' + actionNotTaken
-	});
+var errorJSON = exports.errorJSON = function(res, inputObj) {
+	var errorObj = {};
+
+	if (inputObj.type) errorObj.type = inputObj.type + ': Does not exist';
+	if (inputObj.message) errorObj.message = 'req.body.contribution was not ' + inputObj.message;
+	if (inputObj.changed) errorObj.changed = 'Nothing ' + inputObj.changed + 'ed';
+
+	return res.jsonp(errorObj);
 };
 
 exports.create = function(req, res) {
 	if (is.empty(req.body.contribution)) {
-		return errorJSON(res, 'Post', 'Created');
+		return errorJSON(res, {type: 'Post', message: 'sent', changed: 'Created'});
 	}
 
 	var contribution = new Contribution({
 		info: req.body.contribution.info,
-
 		user: req.user,
 		report: req.report
 	});
 
 	contribution.save(function(err) {
-		if (err) {
-			return res.status(400).send({
-				message: errorHandler.getErrorMessage(err)
-			});
-		} else {
-			res.jsonp(contribution);
-		}
+		if (err)
+			return errorJSON(res, {type: 'Save', message: 'saved', changed: 'Saved'});
+
+		res.jsonp(contribution);
 	});
 };
 
 exports.update = function(req, res) {
 	if (is.empty(req.body.contribution)) {
-		return errorJSON(res, 'Put', 'Updated');
+		return errorJSON(res, {type: 'Put', message: 'sent', changed: 'Updated'});
 	}
-
-	console.log(req.user);
-	console.log(req.report);
 
 	var contribution = req.contribution;
 
