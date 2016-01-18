@@ -7,30 +7,16 @@ describe('Mongoose', function() {
    var mongoose = require('mongoose'),
        Schema = mongoose.Schema;
 
-   function createMySchema() {
-       return contribution.defineSchemaWith({
+   beforeEach(function() {
+       contribution.createModel('MySchema', {
            name: {
                type: String
            }
-       }, 'MySchema');
-   }
-
-   function createMyDoc(name, Schema, added) {
-       return contribution.createDocWith({
-           name: name
-       }, Schema, added);
-   }
-
-   function getMySchema() {
-       return mongoose.model('MySchema');
-   }
-
-   beforeEach(function() {
-       mongoose.model('MySchema', createMySchema());
+       });
    });
 
-   it ('should be able to define a schema', function(done) {
-       var MySchema = getMySchema();
+   it ('should be able to create a model', function(done) {
+       var MySchema = contribution.getModel('MySchema');
 
        should.equal(MySchema.schema.options.collection, 'MySchema');
        should.exist(MySchema.schema.tree.name);
@@ -39,19 +25,17 @@ describe('Mongoose', function() {
        done();
    });
 
-   it ('should be able to init a schema with given values', function(done) {
-       function added(MyDoc) {
+   it ('should be able to create a doc given a model', function(done) {
+       contribution.createDoc('MySchema', {name: 'Huck Finn'}, function (MyDoc) {
            should.equal('Huck Finn', MyDoc.name);
            should.exist(MyDoc._id);
 
            done();
-       }
-
-       createMyDoc('Huck Finn', getMySchema(), added);
+       });
    });
 
    afterEach(function() {
-      delete mongoose.connection.models['MySchema'];
+      contribution.removeModel('MySchema');
    });
 });
 
@@ -107,7 +91,7 @@ describe('Dynamic Schema Tests', function() {
         message: '',
         jsonp: function(obj) { this.message = obj; return obj; }
     };
-
+/*
     it('createSchema() should be able to create a new contribution', function(done) {
        var schema = contribution.createSchema('Contribution', {
            info: mockReq.body.contribution.info,
@@ -131,5 +115,5 @@ describe('Dynamic Schema Tests', function() {
         should.equal(schema.info, 'Hello');
 
         done();
-    });
+    });*/
 });

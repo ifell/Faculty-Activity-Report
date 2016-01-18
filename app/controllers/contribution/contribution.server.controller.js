@@ -12,13 +12,24 @@ var u = require('underscore');
 var mongoose = require('mongoose'),
 	Schema = mongoose.Schema;
 
-var defineSchemaWith = exports.defineSchemaWith = function(definitionJSON, collectionName) {
-	return new Schema(definitionJSON, {collection: collectionName});
+var createModel = exports.createModel = function(modelName, definitions) {
+	var Model = new Schema(definitions, {collection: modelName});
+    mongoose.model(modelName, Model);
+    return Model;
 };
 
-var createDocWith = exports.createDocWith = function(initJSON, Model, onceAdded) {
-	var model = new Model(initJSON);
-	model.save(function(err, doc) {
+var removeModel = exports.removeModel = function(modelName) {
+    delete mongoose.connection.models[modelName];
+};
+
+var getModel = exports.getModel = function(modelName) {
+    return mongoose.model(modelName);
+};
+
+var createDoc = exports.createDoc = function(modelName, inputJSON, onceAdded) {
+    var nModel = getModel(modelName);
+	var Model = new nModel(inputJSON);
+	Model.save(function(err, doc) {
 		if (err)
 			return errorJSON(res, {type: 'Save', message: 'saved', changed: 'Saved'});
 
