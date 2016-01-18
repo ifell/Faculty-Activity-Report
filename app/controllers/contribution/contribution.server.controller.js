@@ -9,6 +9,17 @@ var _ = require('lodash');
 
 var u = require('underscore');
 
+var mongoose = require('mongoose'),
+	Schema = mongoose.Schema;
+
+var defineSchemaWith = exports.defineSchemaWith = function(definitionJSON, collectionName) {
+	return new Schema(definitionJSON, {collection: collectionName});
+};
+
+var initSchemaWith = exports.initSchemaWith = function(initJSON, Model) {
+	return new Model(initJSON);
+};
+
 var errorJSON = exports.errorJSON = function(res, inputObj) {
 	var errorObj = {};
 
@@ -23,7 +34,7 @@ var createSchema = exports.createSchema = function(section, schemaJSON, res) {
 	var schema = undefined; // null schema?
 
 	if (section === 'Contribution')
-		schema = Contribution(schemaJSON);
+		schema = new Contribution(schemaJSON);
 
 	/* Adapters for database? */
 	schema.save(function(err) {

@@ -3,6 +3,65 @@
 var should = require('should');
 var	contribution = require('../../controllers/contribution/contribution');
 
+describe('Mongoose', function() {
+   var mongoose = require('mongoose'),
+       Schema = mongoose.Schema;
+
+   function createMySchema() {
+       return contribution.defineSchemaWith({
+           name: {
+               type: String
+           }
+       }, 'MySchema');
+   }
+
+   function initSchema(name, Schema) {
+       return contribution.initSchemaWith({
+           name: name
+       }, Schema);
+   }
+
+   function getMySchema() {
+       return mongoose.model('MySchema');
+   }
+
+   beforeEach(function() {
+       mongoose.model('MySchema', createMySchema());
+   });
+
+   it ('should be able to define a schema', function(done) {
+       var MySchema = getMySchema();
+
+       should.equal(MySchema.schema.options.collection, 'MySchema');
+       should.exist(MySchema.schema.tree.name);
+       should.exist(MySchema.schema.tree.id);
+
+       done();
+   });
+
+   it ('should be able to init a schema with given values', function(done) {
+       var MySchema = initSchema('Huck Finn', getMySchema());
+
+       should.equal('Huck Finn', MySchema.name);
+       should.exist(MySchema._id);
+
+       done();
+   });
+
+   it ('should be able to save an instantiated schema', function(done) {
+       var MySchema = initSchema('Huck Finn', getMySchema());
+
+       MySchema.save(function(err) {
+           should.not.exist(err);
+           done();
+       });
+   });
+
+   afterEach(function() {
+      delete mongoose.connection.models['MySchema'];
+   });
+});
+
 describe('Error Tests', function() {
 
     var mockReq = {
