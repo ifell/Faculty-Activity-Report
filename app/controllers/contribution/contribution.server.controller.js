@@ -19,43 +19,54 @@ var errorJSON = exports.errorJSON = function(res, inputObj) {
 	return res.jsonp(errorObj);
 };
 
-exports.create = function(req, res) {
-	if (is.empty(req.body.contribution)) {
-		return errorJSON(res, {type: 'Post', message: 'sent', changed: 'Created'});
-	}
+var createSchema = exports.createSchema = function(section, schemaJSON, res) {
+	var schema = undefined; // null schema?
 
-	var contribution = new Contribution({
-		info: req.body.contribution.info,
-		user: req.user,
-		report: req.report
-	});
+	if (section === 'Contribution')
+		schema = Contribution(schemaJSON);
 
-	contribution.save(function(err) {
+	/* Adapters for database? */
+	schema.save(function(err) {
 		if (err)
 			return errorJSON(res, {type: 'Save', message: 'saved', changed: 'Saved'});
 
-		res.jsonp(contribution);
+		return res.jsonp(schema);
 	});
 };
 
-exports.update = function(req, res) {
-	if (is.empty(req.body.contribution)) {
-		return errorJSON(res, {type: 'Put', message: 'sent', changed: 'Updated'});
-	}
+var updateSchema = exports.updateSchema = function(section, schemaJSON, req, res) {
+	var schema = undefined; // null schema?
 
-	var contribution = req.contribution;
+	if (section === 'Contribution')
+		schema = req.contribution;
 
-	contribution = _.extend(contribution, req.body.contribution);
+	schema = _.extend(schema, schemaJSON);
 
-	contribution.save(function(err) {
-		if (err) {
-			return res.status(400).send({
-				message: errorHandler.getErrorMessage(err)
-			});
-		} else {
-			res.jsonp(contribution);
-		}
+	/* Adapters for database? */
+	schema.save(function(err) {
+		if (err)
+			return errorJSON(res, {type: 'Save', message: 'saved', changed: 'Updated'});
+
+		return res.jsonp(schema);
 	});
+};
+
+exports.create = function(req, res) {
+	if (is.empty(req.body.contribution))
+		return errorJSON(res, {type: 'Post', message: 'sent', changed: 'Created'});
+
+	return createSchema('Contribution', {
+		info: req.body.contribution.info,
+		user: req.user,
+		report: req.report
+	}, res);
+};
+
+exports.update = function(req, res) {
+	if (is.empty(req.body.contribution))
+		return errorJSON(res, {type: 'Put', message: 'sent', changed: 'Updated'});
+
+	return updateSchema('Contribution', req.body.contribution, req, res);
 };
 
 exports.readFromReport = function(req, res) {
@@ -63,11 +74,9 @@ exports.readFromReport = function(req, res) {
 	.populate('user', 'displayName')
 	.populate('report', 'reportName')
 	.exec(function(err, result) {
-		if (err) {
-			return res.status(400).send({
-				message: errorHandler.getErrorMessage(err)
-			});
-		}
+		if (err)
+			return errorJSON(res, {type: 'ReadFromReport', changed: 'Read'});
+
 		return res.jsonp(result);
 	});
 };
