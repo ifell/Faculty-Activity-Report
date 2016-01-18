@@ -15,10 +15,10 @@ describe('Mongoose', function() {
        }, 'MySchema');
    }
 
-   function initSchema(name, Schema) {
-       return contribution.initSchemaWith({
+   function createMyDoc(name, Schema, added) {
+       return contribution.createDocWith({
            name: name
-       }, Schema);
+       }, Schema, added);
    }
 
    function getMySchema() {
@@ -40,21 +40,14 @@ describe('Mongoose', function() {
    });
 
    it ('should be able to init a schema with given values', function(done) {
-       var MySchema = initSchema('Huck Finn', getMySchema());
+       function added(MyDoc) {
+           should.equal('Huck Finn', MyDoc.name);
+           should.exist(MyDoc._id);
 
-       should.equal('Huck Finn', MySchema.name);
-       should.exist(MySchema._id);
-
-       done();
-   });
-
-   it ('should be able to save an instantiated schema', function(done) {
-       var MySchema = initSchema('Huck Finn', getMySchema());
-
-       MySchema.save(function(err) {
-           should.not.exist(err);
            done();
-       });
+       }
+
+       createMyDoc('Huck Finn', getMySchema(), added);
    });
 
    afterEach(function() {

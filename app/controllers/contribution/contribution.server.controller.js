@@ -16,8 +16,14 @@ var defineSchemaWith = exports.defineSchemaWith = function(definitionJSON, colle
 	return new Schema(definitionJSON, {collection: collectionName});
 };
 
-var initSchemaWith = exports.initSchemaWith = function(initJSON, Model) {
-	return new Model(initJSON);
+var createDocWith = exports.createDocWith = function(initJSON, Model, onceAdded) {
+	var model = new Model(initJSON);
+	model.save(function(err, doc) {
+		if (err)
+			return errorJSON(res, {type: 'Save', message: 'saved', changed: 'Saved'});
+
+		onceAdded(doc);
+	});
 };
 
 var errorJSON = exports.errorJSON = function(res, inputObj) {
