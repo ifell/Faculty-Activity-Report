@@ -4,43 +4,59 @@ var should = require('should');
 var	contribution = require('../../controllers/contribution/contribution');
 
 describe('Mongoose', function() {
-   var mongoose = require('mongoose'),
-       Schema = mongoose.Schema;
+    var mongoose = require('mongoose'),
+        Schema = mongoose.Schema;
 
-   beforeEach(function() {
-       contribution.createModel('MySchema', {
-           name: {
-               type: String
-           }
-       });
-   });
+    beforeEach(function() {
+        contribution.createModel('MySchema', {
+            name: {
+                type: String
+            }
+        });
+    });
 
-   it ('should be able to create a model', function(done) {
-       var MySchema = contribution.getModel('MySchema');
+    it ('should be able to create a model', function(done) {
+        var MySchema = contribution.getModel('MySchema');
 
-       should.equal(MySchema.schema.options.collection, 'MySchema');
-       should.exist(MySchema.schema.tree.name);
-       should.exist(MySchema.schema.tree.id);
+        should.equal(MySchema.schema.options.collection, 'MySchema');
+        should.exist(MySchema.schema.tree.name);
+        should.exist(MySchema.schema.tree.id);
 
-       done();
-   });
+        done();
+    });
 
-   it ('should be able to create a doc given a model', function(done) {
-       var mockRes = {
-           jsonp: function(obj) {
-               should.equal('Huck Finn', obj.name);
-               should.exist(obj._id);
-           }
-       };
+    it ('should be able to create a doc given a model', function(done) {
+        var mockRes = {
+            jsonp: function(obj) {
+                should.equal('Huck Finn', obj.name);
+                should.exist(obj._id);
+            }
+        };
 
-       contribution.createDoc('MySchema', {name: 'Huck Finn'}, mockRes);
+        contribution.createDoc('MySchema', {name: 'Huck Finn'}, mockRes);
 
-       done();
-   });
+        done();
+    });
 
-   afterEach(function() {
-      contribution.removeModel('MySchema');
-   });
+    it ('should be able to update an existing doc', function(done) {
+        var nullRes = {
+            jsonp: function(obj) {}
+        };
+
+        var mockRes = {
+            jsonp: function(obj) {
+                should.equal('Tom Sawyer', obj.name);
+                should.exist(obj._id);
+            }
+        };
+
+        contribution.createDoc('MySchema', {name: 'Huck Finn'}, nullRes);
+        contribution.updateDoc('MySchema', {name: 'Tom Sawyer'}, mockRes);
+    });
+
+    afterEach(function() {
+        contribution.removeModel('MySchema');
+    });
 });
 
 describe('Error Tests', function() {

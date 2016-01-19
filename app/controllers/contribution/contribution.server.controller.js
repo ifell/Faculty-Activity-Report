@@ -47,13 +47,13 @@ var errorJSON = exports.errorJSON = function(res, inputObj) {
 	return res.jsonp(errorObj);
 };
 
+/*
 var createSchema = exports.createSchema = function(section, schemaJSON, res) {
 	var schema = undefined; // null schema?
 
 	if (section === 'Contribution')
 		schema = new Contribution(schemaJSON);
 
-	/* Adapters for database? */
 	schema.save(function(err) {
 		if (err)
 			return errorJSON(res, {type: 'Save', message: 'saved', changed: 'Saved'});
@@ -61,6 +61,9 @@ var createSchema = exports.createSchema = function(section, schemaJSON, res) {
 		return res.jsonp(schema);
 	});
 };
+*/
+
+
 
 var updateSchema = exports.updateSchema = function(section, schemaJSON, req, res) {
 	var schema = undefined; // null schema?
@@ -70,7 +73,6 @@ var updateSchema = exports.updateSchema = function(section, schemaJSON, req, res
 
 	schema = _.extend(schema, schemaJSON);
 
-	/* Adapters for database? */
 	schema.save(function(err) {
 		if (err)
 			return errorJSON(res, {type: 'Save', message: 'saved', changed: 'Updated'});
@@ -78,6 +80,7 @@ var updateSchema = exports.updateSchema = function(section, schemaJSON, req, res
 		return res.jsonp(schema);
 	});
 };
+
 
 exports.create = function(req, res) {
 	if (is.empty(req.body.contribution))
