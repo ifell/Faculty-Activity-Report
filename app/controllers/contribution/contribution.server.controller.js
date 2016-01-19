@@ -83,11 +83,13 @@ exports.create = function(req, res) {
 	if (is.empty(req.body.contribution))
 		return errorJSON(res, {type: 'Post', message: 'sent', changed: 'Created'});
 
-	return createSchema('Contribution', {
-		info: req.body.contribution.info,
-		user: req.user,
-		report: req.report
-	}, res);
+	return createDoc('Contribution', {
+        info: req.body.contribution.info,
+        user: req.user,
+        report: req.report
+    }, function(doc) {
+        res.jsonp(doc);
+    });
 };
 
 exports.update = function(req, res) {

@@ -26,6 +26,10 @@ describe('Mongoose', function() {
    });
 
    it ('should be able to create a doc given a model', function(done) {
+       var mockRes = {
+           jsonp: function(obj) { return obj; }
+       };
+
        contribution.createDoc('MySchema', {name: 'Huck Finn'}, function (MyDoc) {
            should.equal('Huck Finn', MyDoc.name);
            should.exist(MyDoc._id);
@@ -91,7 +95,7 @@ describe('Dynamic Schema Tests', function() {
         message: '',
         jsonp: function(obj) { this.message = obj; return obj; }
     };
-/*
+
     it('createSchema() should be able to create a new contribution', function(done) {
        var schema = contribution.createSchema('Contribution', {
            info: mockReq.body.contribution.info,
@@ -115,5 +119,5 @@ describe('Dynamic Schema Tests', function() {
         should.equal(schema.info, 'Hello');
 
         done();
-    });*/
+    });
 });
