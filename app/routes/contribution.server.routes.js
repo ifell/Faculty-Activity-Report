@@ -5,6 +5,8 @@ module.exports = function(app) {
 	var contribution = require('../../app/controllers/contribution/contribution');
 	var reports = require('../../app/controllers/reports');
 
+    var section = require('../../app/controllers/section');
+
 	app.route('/reports/:reportId/contribution')
 		.get(users.requiresLogin, reports.hasAuthorization, contribution.readFromReport)
 		.post(users.requiresLogin, reports.hasAuthorization, contribution.create);
@@ -15,4 +17,6 @@ module.exports = function(app) {
 
 	// Finish by binding the Contribution middleware
 	app.param('contributionId', contribution.contributionById);
+    //app.param('section', section.name());
+    //app.param('sectionId', section.id());
 };
