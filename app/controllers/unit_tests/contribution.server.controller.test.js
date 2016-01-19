@@ -39,19 +39,23 @@ describe('Mongoose', function() {
     });
 
     it ('should be able to update an existing doc', function(done) {
-        var nullRes = {
-            jsonp: function(obj) {}
-        };
-
         var mockRes = {
             jsonp: function(obj) {
                 should.equal('Tom Sawyer', obj.name);
-                should.exist(obj._id);
+                done();
             }
         };
 
-        contribution.createDoc('MySchema', {name: 'Huck Finn'}, nullRes);
-        contribution.updateDoc('MySchema', {name: 'Tom Sawyer'}, mockRes);
+        var mockReq = {
+            mySchema: {
+                name: 'Huck Finn',
+                save: function(callback) {
+                    callback(undefined, this);
+                }
+            }
+        };
+
+        contribution.updateDoc('MySchema', {name: 'Tom Sawyer'}, mockReq, mockRes);
     });
 
     afterEach(function() {
@@ -70,7 +74,7 @@ describe('Error Tests', function() {
 
         if (inputObj.type) should.equal(error.type, inputObj.type + ': Does not exist');
         if (inputObj.message) should.equal(error.message, 'req.body.contribution was not ' + inputObj.message);
-        if (inputObj.changed) should.equal(error.changed, 'Nothing ' + inputObj.changed + 'ed');
+        if (inputObj.changed) should.equal(error.changed, 'Nothing ' + inputObj.changed);
     }
 
     it('errorJSON() should return JSON in the proper format', function(done) {
@@ -88,53 +92,3 @@ describe('Error Tests', function() {
         done();
     });
 });
-/*
-describe('Dynamic Schema Tests', function() {
-    var mockReq = {
-        body: {
-            contribution: {
-                info: 'Hello'
-            }
-        },
-        user: {
-
-        },
-        report: {
-
-        },
-        contribution: {
-            info: 'This should change'
-        }
-    };
-
-    var mockRes = {
-        message: '',
-        jsonp: function(obj) { this.message = obj; return obj; }
-    };
-
-    it('createSchema() should be able to create a new contribution', function(done) {
-       var schema = contribution.createSchema('Contribution', {
-           info: mockReq.body.contribution.info,
-           user: mockReq.user,
-           report: mockReq.report
-       }, mockRes);
-
-       should.equal(mockRes.message, '');
-       should.equal(schema.info, 'Hello');
-
-       done();
-    });
-
-    it ('updateSchema() should be able to update the schema given', function(done) {
-        var schema = contribution.updateSchema('Contribution', {
-            info: 'Hello',
-            user: mockReq.user,
-            report: mockReq.report
-        }, mockReq, mockRes);
-
-        should.equal(schema.info, 'Hello');
-
-        done();
-    });
-});
-*/

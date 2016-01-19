@@ -26,9 +26,9 @@ var getModel = exports.getModel = function(modelName) {
     return mongoose.model(modelName);
 };
 
-var createDoc = exports.createDoc = function(modelName, inputJSON, res) {
-    var nModel = getModel(modelName);
-	var Doc = new nModel(inputJSON);
+var createDoc = exports.createDoc = function(name, inputJSON, res) {
+    var Model = getModel(name);
+	var Doc = new Model(inputJSON);
 	Doc.save(function(err, doc) {
 		if (err)
 			return errorJSON(res, {type: 'Save', message: 'saved', changed: 'Saved'});
@@ -37,50 +37,38 @@ var createDoc = exports.createDoc = function(modelName, inputJSON, res) {
 	});
 };
 
+function toCamelCase(string) {
+    return string.charAt(0).toLowerCase() + string.slice(1);
+}
+
+var updateDoc = exports.updateDoc = function(name, inputJSON, req, res) {
+    /* null doc? */
+    var Doc = undefined;
+
+    name = toCamelCase(name);
+
+    if (req.hasOwnProperty(name))
+        Doc = req[name];
+
+    Doc = _.extend(Doc, inputJSON);
+
+    Doc.save(function(err, doc) {
+        if (err)
+            return errorJSON(res, {type: 'Save', message: 'saved', changed: 'Saved'});
+
+        res.jsonp(doc);
+    });
+};
+
 var errorJSON = exports.errorJSON = function(res, inputObj) {
 	var errorObj = {};
 
 	if (inputObj.type) errorObj.type = inputObj.type + ': Does not exist';
 	if (inputObj.message) errorObj.message = 'req.body.contribution was not ' + inputObj.message;
-	if (inputObj.changed) errorObj.changed = 'Nothing ' + inputObj.changed + 'ed';
+	if (inputObj.changed) errorObj.changed = 'Nothing ' + inputObj.changed;
 
 	return res.jsonp(errorObj);
 };
-
-/*
-var createSchema = exports.createSchema = function(section, schemaJSON, res) {
-	var schema = undefined; // null schema?
-
-	if (section === 'Contribution')
-		schema = new Contribution(schemaJSON);
-
-	schema.save(function(err) {
-		if (err)
-			return errorJSON(res, {type: 'Save', message: 'saved', changed: 'Saved'});
-
-		return res.jsonp(schema);
-	});
-};
-*/
-
-
-
-var updateSchema = exports.updateSchema = function(section, schemaJSON, req, res) {
-	var schema = undefined; // null schema?
-
-	if (section === 'Contribution')
-		schema = req.contribution;
-
-	schema = _.extend(schema, schemaJSON);
-
-	schema.save(function(err) {
-		if (err)
-			return errorJSON(res, {type: 'Save', message: 'saved', changed: 'Updated'});
-
-		return res.jsonp(schema);
-	});
-};
-
 
 exports.create = function(req, res) {
 	if (is.empty(req.body.contribution))
@@ -97,7 +85,7 @@ exports.update = function(req, res) {
 	if (is.empty(req.body.contribution))
 		return errorJSON(res, {type: 'Put', message: 'sent', changed: 'Updated'});
 
-	return updateSchema('Contribution', req.body.contribution, req, res);
+	return updateDoc('Contribution', req.body.contribution, req, res);
 };
 
 exports.readFromReport = function(req, res) {
