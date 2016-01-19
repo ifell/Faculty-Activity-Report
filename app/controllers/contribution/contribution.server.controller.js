@@ -26,14 +26,14 @@ var getModel = exports.getModel = function(modelName) {
     return mongoose.model(modelName);
 };
 
-var createDoc = exports.createDoc = function(modelName, inputJSON, onceAdded) {
+var createDoc = exports.createDoc = function(modelName, inputJSON, res) {
     var nModel = getModel(modelName);
-	var Model = new nModel(inputJSON);
-	Model.save(function(err, doc) {
+	var Doc = new nModel(inputJSON);
+	Doc.save(function(err, doc) {
 		if (err)
 			return errorJSON(res, {type: 'Save', message: 'saved', changed: 'Saved'});
 
-		onceAdded(doc);
+		res.jsonp(doc);
 	});
 };
 
@@ -87,9 +87,7 @@ exports.create = function(req, res) {
         info: req.body.contribution.info,
         user: req.user,
         report: req.report
-    }, function(doc) {
-        res.jsonp(doc);
-    });
+    }, res);
 };
 
 exports.update = function(req, res) {
