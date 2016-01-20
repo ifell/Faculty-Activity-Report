@@ -17,23 +17,23 @@ var Report = mongoose.model('Report');
 
 var async = require('async');
 
-var user, user2, c1, c2, report, report2;
+var username, admin, usernamesContribution, adminsContribution, usernamesReport, adminsReport;
 
-describe('Contribution Controller Tests', function() {
+describe('Section Route Tests', function() {
     beforeEach(function(done) {
 
-        user = new User({
+        username = new User({
             firstName: 'Full',
             lastName: 'Name',
             email: 'test@test.com',
-            username: 'user',
+            username: 'username',
             password: 'password',
             provider: 'local'
         });
 
-        user.save();
+        username.save();
 
-        user2 = new User({
+        admin = new User({
             firstName: 'Full',
             lastName: 'Name',
             email: 'test@test.com',
@@ -43,430 +43,483 @@ describe('Contribution Controller Tests', function() {
             roles: ['admin']
         });
 
-        user2.save();
+        admin.save();
 
-        report = new Report({
+        usernamesReport = new Report({
             reportName: 'MyReportName',
-            user: user
+            user: username
         });
 
-        report.save();
+        usernamesReport.save();
 
-        report2 = new Report({
+        adminsReport = new Report({
             reportName: 'MyReportName',
-            user: user2
+            user: admin
         });
 
-        report2.save();
+        adminsReport.save();
 
-        c1 = new Contribution({
+        usernamesContribution = new Contribution({
             info: 'I made the following contributions...',
 
-            report: report,
-            user: user
+            report: usernamesReport,
+            user: username
         });
 
-        c2 = new Contribution({
+        adminsContribution = new Contribution({
             info: 'I did stuff too',
 
-            report: report,
-            user: user2
+            report: usernamesReport,
+            user: admin
         });
 
-        c1.save();
-        c2.save();
+        usernamesContribution.save();
+        adminsContribution.save();
 
         done();
     });
 
-    describe('Testing the GET methods', function() {
-        describe('Not Logged In, Not AuthoriZed', function() {
-            it('should fail to get a section', function(done) {
-                request(app)
-                    .get('/reports/' + report.id + '/contribution')
-                    .set('Accept', 'application/json')
-                    .expect(401)
-                    .end(function(err, res) {
-                        should.not.exist(err);
-                        res.body.should.be.eql({message:'User is not logged in'});
-                        done();
-                    });
+    describe('Route: "/reports/:reportId/contribution"', function() {
+        describe('GET routes', function() {
+            describe('Not Logged In, Not AuthoriZed', function () {
+                it('should fail to get a section', function (done) {
+                    request(app)
+                        .get('/reports/' + usernamesReport.id + '/contribution')
+                        .set('Accept', 'application/json')
+                        .expect(401)
+                        .end(function (err, res) {
+                            should.not.exist(err);
+                            res.body.should.be.eql({message: 'User is not logged in'});
+                            done();
+                        });
+                });
+            });
+
+            describe('Logged In, Not AuthoriZed', function () {
+                it('should fail to get a section', function (done) {
+                    request(app)
+                        .post('/auth/signin')
+                        .send({
+                            username: 'username',
+                            password: 'password'
+                        })
+                        .expect(200)
+                        .end(function (err, res) {
+                            request(app)
+                                .get('/reports/' + adminsReport.id + '/contribution')
+                                .set('cookie', res.headers['set-cookie'])
+                                .set('Accept', 'application/json')
+                                .expect(403)
+                                .end(function (err, res) {
+                                    should.not.exist(err);
+                                    res.body.should.be.eql({message: 'User is not authorized'});
+
+                                    done();
+                                });
+
+                        });
+                });
+            });
+
+            describe('Logged In, AuthoriZed (user)', function () {
+                it('should get a section', function (done) {
+                    request(app)
+                        .post('/auth/signin')
+                        .send({
+                            username: 'username',
+                            password: 'password'
+                        })
+                        .expect(200)
+                        .end(function (err, res) {
+                            request(app)
+                                .get('/reports/' + usernamesReport.id + '/contribution')
+                                .set('cookie', res.headers['set-cookie'])
+                                .set('Accept', 'application/json')
+
+                                .expect(200)
+                                .end(function (err, res) {
+                                    should.not.exist(err);
+
+                                    res.body.should.have.property('_id', usernamesContribution.id);
+                                    res.body.should.have.property('info', usernamesContribution.info);
+                                    res.body.user.should.have.property('_id', username.id);
+                                    res.body.report.should.have.property('_id', usernamesReport.id);
+                                    done();
+                                });
+                        });
+                });
+            });
+
+            describe('Logged In, AuthoriZed (superuser)', function () {
+                it('should get a section', function (done) {
+                    request(app)
+                        .post('/auth/signin')
+                        .send({
+                            username: 'admin',
+                            password: 'password'
+                        })
+                        .expect(200)
+                        .end(function (err, res) {
+                            request(app)
+                                .get('/reports/' + usernamesReport.id + '/contribution')
+                                .set('cookie', res.headers['set-cookie'])
+                                .set('Accept', 'application/json')
+
+                                .expect(200)
+                                .end(function (err, res) {
+                                    should.not.exist(err);
+
+                                    res.body.should.have.property('_id', usernamesContribution.id);
+                                    res.body.should.have.property('info', usernamesContribution.info);
+                                    res.body.user.should.have.property('_id', username.id);
+                                    res.body.report.should.have.property('_id', usernamesReport.id);
+                                    done();
+                                });
+                        });
+                });
             });
         });
 
-        describe('Logged In, Not AuthoriZed', function() {
-            it('should fail to get a section', function(done) {
-                request(app)
-                    .post('/auth/signin')
-                    .send({
-                        username:'user',
-                        password:'password'
-                    })
-                    .expect(200)
-                    .end(function(err, res) {
-                        request(app)
-                            .get('/reports/' + report2.id + '/contribution')
-                            .set('cookie', res.headers['set-cookie'])
-                            .set('Accept', 'application/json')
-                            .expect(403)
-                            .end(function(err, res) {
-                                should.not.exist(err);
-                                res.body.should.be.eql({message:'User is not authorized'});
+        describe('POST', function() {
+            var contributionObj = {
+                contribution: {
+                    info:'Contributing things'
+                }
+            };
 
-                                done();
-                            });
-
-                    });
-            });
-        });
-
-        describe('Logged In, AuthoriZed', function() {
-            it('should get a section from its corresponding report id', function(done) {
-                request(app)
-                    .post('/auth/signin')
-                    .send({
-                        username:'user',
-                        password:'password'
-                    })
-                    .expect(200)
-                    .end(function(err, res) {
-                        request(app)
-                            .get('/reports/' + report.id + '/contribution')
-                            .set('cookie', res.headers['set-cookie'])
-                            .set('Accept', 'application/json')
-
-                            .expect(200)
-                            .end(function(err, res) {
-                                should.not.exist(err);
-
-                                res.body.should.have.property('_id', c1.id);
-                                res.body.should.have.property('info', c1.info);
-                                res.body.user.should.have.property('_id', user.id);
-                                res.body.report.should.have.property('_id', report.id);
-                                done();
-                            });
-                    });
-            });
-        });
-
-    /*
-        it('should fail to be able to get a specific contribution if not logged in', function(done) {
-            request(app)
-                .get('/contribution/' + c1.id)
-                .set('Accept', 'application/json')
-
-                .expect(401)
-                .end(done);
-        });
-        */
-
-        it('should not be able to get a specific contribution if the user does not own the contribution and is not a superuser', function(done) {
-            request(app)
-                .post('/auth/signin')
-                .send({
-                    username:'user',
-                    password:'password'
-                })
-                .expect(200)
-                .end(function(err, res) {
+            describe('Not Logged In, Not AuthoriZed', function() {
+                it('should fail to create a section', function(done) {
                     request(app)
-                        .get('/contribution/' + c2.id)
-                        .set('cookie', res.headers['set-cookie'])
-                        .set('Accept', 'application/json')
-
-                        .expect(403)
-                        .end(function(err, res) {
-                            should.not.exist(err);
-
-                            res.body.should.have.property('message').and.equal('User is not authorized');
-
-                            done();
-                        });
-
-                });
-        });
-
-        it('should be able to get a specific contribution if the user does own the contribution and is not a superuser', function(done) {
-            request(app)
-                .post('/auth/signin')
-                .send({
-                    username:'user',
-                    password:'password'
-                })
-                .expect(200)
-                .end(function(err, res) {
-                    request(app)
-                        .get('/contribution/' + c1.id)
-                        .set('cookie', res.headers['set-cookie'])
-                        .set('Accept', 'application/json')
-
-                        .expect(200)
-                        .end(function(err, res) {
-                            should.not.exist(err);
-
-                            res.body.should.have.property('_id', c1.id);
-                            res.body.user.should.have.property('_id', user.id);
-                            res.body.report.should.have.property('_id', report.id);
-
-                            done();
-                        });
-
-                });
-        });
-
-        it('should be able to get a specific contribution if the user does not own the contribution and is a superuser', function(done) {
-            request(app)
-                .post('/auth/signin')
-                .send({
-                    username:'admin',
-                    password:'password'
-                })
-                .expect(200)
-                .end(function(err, res) {
-                    request(app)
-                        .get('/contribution/' + c1.id)
-                        .set('cookie', res.headers['set-cookie'])
-                        .set('Accept', 'application/json')
-
-                        .expect(200)
-                        .end(function(err, res) {
-                            should.not.exist(err);
-
-                            res.body.should.have.property('_id', c1.id);
-                            res.body.user.should.have.property('_id', user.id);
-                            res.body.report.should.have.property('_id', report.id);
-
-                            done();
-                        });
-
-                });
-        });
-
-        it('should be able to get a specific contribution if the user does own the contribution is a superuser', function(done) {
-            request(app)
-                .post('/auth/signin')
-                .send({
-                    username:'admin',
-                    password:'password'
-                })
-                .expect(200)
-                .end(function(err, res) {
-                    request(app)
-                        .get('/contribution/' + c2.id)
-                        .set('cookie', res.headers['set-cookie'])
-                        .set('Accept', 'application/json')
-
-                        .expect(200)
-                        .end(function(err, res) {
-                            should.not.exist(err);
-
-                            res.body.should.have.property('_id', c2.id);
-                            res.body.user.should.have.property('_id', user2.id);
-                            res.body.report.should.have.property('_id', report.id);
-
-                            done();
-                        });
-
-                });
-        });
-
-    });
-
-    describe('Testing the POST methods', function() {
-
-        var contributionObj = {
-            contribution: {
-                info:'Contributing things'
-            }
-        };
-
-        it('should fail to be able to create a contribution if not logged in', function(done) {
-            request(app)
-                .post('/reports/' + report.id + '/contribution')
-                .set('Accept', 'application/json')
-                .send(contributionObj)
-
-                .expect(401)
-                .end(done);
-        });
-
-        it('should be able to create a new contribution', function(done) {
-            request(app)
-                .post('/auth/signin')
-                .send({
-                    username:'user',
-                    password:'password'
-                })
-                .expect(200)
-                .end(function(err, res) {
-                    request(app)
-                        .post('/reports/' + report.id + '/contribution')
-                        .set('cookie', res.headers['set-cookie'])
+                        .post('/reports/' + usernamesReport.id + '/contribution')
                         .set('Accept', 'application/json')
                         .send(contributionObj)
 
-                        .expect(200)
+                        .expect(401)
                         .end(function(err, res) {
                             should.not.exist(err);
-
-                            res.body.should.have.property('info', contributionObj.contribution.info);
-
-                            res.body.should.have.property('_id');
-                            res.body.should.have.property('user');
-                            res.body.should.have.property('report');
+                            res.body.should.be.eql({message: 'User is not logged in'});
 
                             done();
                         });
                 });
-        });
+            });
 
+            describe('Logged In, Not AuthoriZed', function() {
+                it('should fail to create a section', function(done) {
+                    request(app)
+                        .post('/auth/signin')
+                        .send({
+                            username:'username',
+                            password:'password'
+                        })
+                        .expect(200)
+                        .end(function(err, res) {
+                            request(app)
+                                .post('/reports/' + adminsReport.id + '/contribution')
+                                .set('cookie', res.headers['set-cookie'])
+                                .set('Accept', 'application/json')
+                                .send(contributionObj)
+
+                                .expect(403)
+                                .end(function(err, res) {
+                                    should.not.exist(err);
+                                    res.body.should.be.eql({message: 'User is not authorized'});
+
+                                    done();
+                                });
+                        });
+                });
+            });
+
+            describe('Logged In, AuthoriZed (user)', function() {
+                it('should create a section', function(done) {
+                    request(app)
+                        .post('/auth/signin')
+                        .send({
+                            username:'username',
+                            password:'password'
+                        })
+                        .expect(200)
+                        .end(function(err, res) {
+                            request(app)
+                                .post('/reports/' + usernamesReport.id + '/contribution')
+                                .set('cookie', res.headers['set-cookie'])
+                                .set('Accept', 'application/json')
+                                .send(contributionObj)
+
+                                .expect(200)
+                                .end(function(err, res) {
+                                    should.not.exist(err);
+
+                                    res.body.should.have.property('info', contributionObj.contribution.info);
+                                    res.body.should.have.property('_id');
+                                    res.body.should.have.property('user');
+                                    res.body.should.have.property('report');
+
+                                    done();
+                                });
+                        });
+                });
+            });
+
+            describe('Logged In, AuthoriZed (superuser)', function() {
+                it('should create a section', function(done) {
+                    request(app)
+                        .post('/auth/signin')
+                        .send({
+                            username:'admin',
+                            password:'password'
+                        })
+                        .expect(200)
+                        .end(function(err, res) {
+                            request(app)
+                                .post('/reports/' + usernamesReport.id + '/contribution')
+                                .set('cookie', res.headers['set-cookie'])
+                                .set('Accept', 'application/json')
+                                .send(contributionObj)
+
+                                .expect(200)
+                                .end(function(err, res) {
+                                    should.not.exist(err);
+
+                                    res.body.should.have.property('info', contributionObj.contribution.info);
+                                    res.body.should.have.property('_id');
+                                    res.body.should.have.property('user');
+                                    res.body.should.have.property('report');
+
+                                    done();
+                                });
+                        });
+                });
+            });
+        });
     });
 
-    describe('Testing the PUT methods', function() {
+    describe('Route: "/contribution/:contributionId"', function() {
+        describe('GET routes', function() {
+            describe('Not Logged In, Not AuthoriZed', function() {
+                it('should fail to get a section', function(done) {
+                    request(app)
+                        .get('/contribution/' + usernamesContribution.id)
+                        .set('Accept', 'application/json')
+                        .expect(401)
+                        .end(function (err, res) {
+                            should.not.exist(err);
+                            res.body.should.be.eql({message: 'User is not logged in'});
+                            done();
+                        });
+                });
+            });
 
-        it('should fail to be able to update a specific contribution if not logged in', function(done) {
-            request(app)
-                .put('/contribution/' + c1.id)
-                .set('Accept', 'application/json')
+            describe('Logged In, Not AuthoriZed', function() {
+                it('should fail to get a section', function (done) {
+                    request(app)
+                        .post('/auth/signin')
+                        .send({
+                            username: 'username',
+                            password: 'password'
+                        })
+                        .expect(200)
+                        .end(function (err, res) {
+                            request(app)
+                                .get('/contribution/' + adminsContribution.id)
+                                .set('cookie', res.headers['set-cookie'])
+                                .set('Accept', 'application/json')
+                                .expect(403)
+                                .end(function (err, res) {
+                                    should.not.exist(err);
+                                    res.body.should.eql({message: 'User is not authorized'});
 
-                .expect(401)
-                .end(done);
+                                    done();
+                                });
+
+                        });
+                });
+            });
+
+            describe('Logged In, AuthroriZed (user)', function() {
+                it('should get a section', function (done) {
+                    request(app)
+                        .post('/auth/signin')
+                        .send({
+                            username: 'username',
+                            password: 'password'
+                        })
+                        .expect(200)
+                        .end(function (err, res) {
+                            request(app)
+                                .get('/contribution/' + usernamesContribution.id)
+                                .set('cookie', res.headers['set-cookie'])
+                                .set('Accept', 'application/json')
+
+                                .expect(200)
+                                .end(function (err, res) {
+                                    should.not.exist(err);
+
+                                    res.body.should.have.property('_id', usernamesContribution.id);
+                                    res.body.user.should.have.property('_id', username.id);
+                                    res.body.report.should.have.property('_id', usernamesReport.id);
+
+                                    done();
+                                });
+
+                        });
+                });
+            });
+
+            describe('Logged In, AuthroriZed (superuser)', function() {
+                it('should get a section', function (done) {
+                    request(app)
+                        .post('/auth/signin')
+                        .send({
+                            username: 'admin',
+                            password: 'password'
+                        })
+                        .expect(200)
+                        .end(function (err, res) {
+                            request(app)
+                                .get('/contribution/' + usernamesContribution.id)
+                                .set('cookie', res.headers['set-cookie'])
+                                .set('Accept', 'application/json')
+
+                                .expect(200)
+                                .end(function (err, res) {
+                                    should.not.exist(err);
+
+                                    res.body.should.have.property('_id', usernamesContribution.id);
+                                    res.body.user.should.have.property('_id', username.id);
+                                    res.body.report.should.have.property('_id', usernamesReport.id);
+
+                                    done();
+                                });
+
+                        });
+                });
+            });
         });
 
-        it('should not be able to update a specific contribution if the user does not own the contribution and is not a superuser', function(done) {
-            request(app)
-                .post('/auth/signin')
-                .send({
-                    username:'user',
-                    password:'password'
-                })
-                .expect(200)
-                .end(function(err, res) {
+        describe('PUT', function() {
+            describe('Not Logged In, Not AuthoriZed', function() {
+                it('should fail to update a section', function(done) {
                     request(app)
-                        .put('/contribution/' + c2.id)
-                        .set('cookie', res.headers['set-cookie'])
+                        .put('/contribution/' + usernamesContribution.id)
                         .set('Accept', 'application/json')
                         .send({
                             contribution: {
                                 info:'Different contributions'
                             }
                         })
-
-                        .expect(403)
-                        .end(function(err, res) {
+                        .expect(401)
+                        .end(function (err, res) {
                             should.not.exist(err);
-
-                            res.body.should.have.property('message').and.equal('User is not authorized');
-
+                            res.body.should.be.eql({message: 'User is not logged in'});
                             done();
                         });
-
                 });
-        });
+            });
 
-        it('should be able to update a specific contribution if the user does own the contribution and is not a superuser', function(done) {
-            request(app)
-                .post('/auth/signin')
-                .send({
-                    username:'user',
-                    password:'password'
-                })
-                .expect(200)
-                .end(function(err, res) {
+            describe('Logged In, Not AuthoriZed', function() {
+                it('should fail to update a section', function(done) {
                     request(app)
-                        .put('/contribution/' + c1.id)
-                        .set('cookie', res.headers['set-cookie'])
-                        .set('Accept', 'application/json')
+                        .post('/auth/signin')
                         .send({
-                            contribution: {
-                                info:'Different contributions'
-                            }
+                            username:'username',
+                            password:'password'
                         })
-
                         .expect(200)
                         .end(function(err, res) {
-                            should.not.exist(err);
+                            request(app)
+                                .put('/contribution/' + adminsContribution.id)
+                                .set('cookie', res.headers['set-cookie'])
+                                .set('Accept', 'application/json')
+                                .send({
+                                    contribution: {
+                                        info:'Different contributions'
+                                    }
+                                })
+                                .expect(403)
+                                .end(function(err, res) {
+                                    should.not.exist(err);
+                                    res.body.should.eql({message: 'User is not authorized'});
 
-                            res.body.should.be.an.Object.and.have.property('info', 'Different contributions');
+                                    done();
+                                });
 
-                            res.body.should.have.property('_id', c1.id);
-                            res.body.user.should.have.property('_id', user.id);
-                            res.body.report.should.have.property('_id', report.id);
-
-                            done();
                         });
-
                 });
-        });
+            });
 
-        it('should be able to update a specific contribution if the user does not own the contribution and is a superuser', function(done) {
-            request(app)
-                .post('/auth/signin')
-                .send({
-                    username:'admin',
-                    password:'password'
-                })
-                .expect(200)
-                .end(function(err, res) {
+            describe('Logged In, AuthoriZed (user)', function() {
+                it('should update a section', function(done) {
                     request(app)
-                        .put('/contribution/' + c1.id)
-                        .set('cookie', res.headers['set-cookie'])
-                        .set('Accept', 'application/json')
+                        .post('/auth/signin')
                         .send({
-                            contribution: {
-                                info:'Different contribution'
-                            }
+                            username:'username',
+                            password:'password'
                         })
-
                         .expect(200)
                         .end(function(err, res) {
-                            should.not.exist(err);
+                            request(app)
+                                .put('/contribution/' + usernamesContribution.id)
+                                .set('cookie', res.headers['set-cookie'])
+                                .set('Accept', 'application/json')
+                                .send({
+                                    contribution: {
+                                        info:'Different contributions'
+                                    }
+                                })
+                                .expect(200)
+                                .end(function(err, res) {
+                                    should.not.exist(err);
 
-                            res.body.should.be.an.Object.and.have.property('info', 'Different contribution');
+                                    res.body.should.be.an.Object.and.have.property('info', 'Different contributions');
 
-                            res.body.should.have.property('_id', c1.id);
-                            res.body.user.should.have.property('_id', user.id);
-                            res.body.report.should.have.property('_id', report.id);
+                                    res.body.should.have.property('_id', usernamesContribution.id);
+                                    res.body.user.should.have.property('_id', username.id);
+                                    res.body.report.should.have.property('_id', usernamesReport.id);
 
-                            done();
+                                    done();
+                                });
+
                         });
-
                 });
-        });
+            });
 
-        it('should be able to update a specific contribution if the user does own the contribution is a superuser', function(done) {
-            request(app)
-                .post('/auth/signin')
-                .send({
-                    username:'admin',
-                    password:'password'
-                })
-                .expect(200)
-                .end(function(err, res) {
+            describe('Logged In, AuthoriZed (superuser)', function() {
+                it('should update a section', function(done) {
                     request(app)
-                        .put('/contribution/' + c2.id)
-                        .set('cookie', res.headers['set-cookie'])
-                        .set('Accept', 'application/json')
+                        .post('/auth/signin')
                         .send({
-                            contribution: {
-                                info:'Different contribution'
-                            }
+                            username:'admin',
+                            password:'password'
                         })
-
                         .expect(200)
                         .end(function(err, res) {
-                            should.not.exist(err);
+                            request(app)
+                                .put('/contribution/' + usernamesContribution.id)
+                                .set('cookie', res.headers['set-cookie'])
+                                .set('Accept', 'application/json')
+                                .send({
+                                    contribution: {
+                                        info:'Different contributions'
+                                    }
+                                })
+                                .expect(200)
+                                .end(function(err, res) {
+                                    should.not.exist(err);
 
-                            res.body.should.be.an.Object.and.have.property('info', 'Different contribution');
+                                    res.body.should.be.an.Object.and.have.property('info', 'Different contributions');
 
-                            res.body.should.have.property('_id', c2.id);
-                            res.body.user.should.have.property('_id', user2.id);
-                            res.body.report.should.have.property('_id', report.id);
+                                    res.body.should.have.property('_id', usernamesContribution.id);
+                                    res.body.user.should.have.property('_id', username.id);
+                                    res.body.report.should.have.property('_id', usernamesReport.id);
 
-                            done();
+                                    done();
+                                });
+
                         });
-
                 });
+            });
         });
     });
 
