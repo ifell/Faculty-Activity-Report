@@ -1,7 +1,7 @@
 'use strict';
 
 var mongoose = require('mongoose');
-var Contribution = mongoose.model('Contribution');
+var Contribution = mongoose.model('contribution');
 
 var is = require('is-js');
 
@@ -13,7 +13,7 @@ exports.create = function(req, res) {
 	if (is.empty(req.body.contribution))
 		return section.errorJSON(res, {type: 'Post', message: 'sent', changed: 'Created'});
 
-	return section.createDoc('Contribution', {
+	return section.createDoc('contribution', {
         info: req.body.contribution.info,
         user: req.user,
         report: req.report
@@ -24,7 +24,7 @@ exports.update = function(req, res) {
 	if (is.empty(req.body.contribution))
 		return section.errorJSON(res, {type: 'Put', message: 'sent', changed: 'Updated'});
 
-	return section.updateDoc('Contribution', req.body.contribution, req, res);
+	return section.updateDoc('contribution', req.body.contribution, req, res);
 };
 
 exports.readFromReport = function(req, res) {

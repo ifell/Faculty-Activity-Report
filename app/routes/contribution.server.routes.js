@@ -7,16 +7,16 @@ module.exports = function(app) {
 
     var section = require('../../app/controllers/section.server.controller.js');
 
-	app.route('/reports/:reportId/contribution')
+	app.route('/reports/:reportId/:section')
 		.get(users.requiresLogin, reports.hasAuthorization, contribution.readFromReport)
 		.post(users.requiresLogin, reports.hasAuthorization, contribution.create);
 
-	app.route('/contribution/:contributionId')
+	app.route('/:section/:contributionId')
 		.get(users.requiresLogin, contribution.hasAuthorization, contribution.read)
 		.put(users.requiresLogin, contribution.hasAuthorization, contribution.update);
 
 	// Finish by binding the Contribution middleware
 	app.param('contributionId', contribution.contributionById);
-    //app.param('section', section.name());
-    //app.param('sectionId', section.id());
+    app.param('section', section.name);
+    //app.param('sectionId', section.id);
 };

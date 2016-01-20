@@ -3,7 +3,7 @@
 var mongoose = require('mongoose'),
     Schema = mongoose.Schema;
 
-var Contribution = mongoose.model('Contribution');
+var Contribution = mongoose.model('contribution');
 var _ = require('lodash');
 
 exports.createModel = function(modelName, definitions) {
@@ -62,4 +62,25 @@ var errorJSON = exports.errorJSON = function(res, inputObj) {
     if (inputObj.changed) errorObj.changed = 'Nothing ' + inputObj.changed;
 
     return res.jsonp(errorObj);
+};
+
+exports.name = function(req, res, next, id) {
+    nameFunction(id, function(doesExist) {
+        if (doesExist)
+            next();
+        else
+            return res.status(404).send({
+                message: 'Section was not found'
+            });
+    });
+};
+
+var nameFunction = exports.nameFunction = function(name, exists) {
+    mongoose.connection.db.listCollections({name: name})
+        .next(function (err, section) {
+            if (section)
+                exists(true);
+            else
+                exists(false);
+        });
 };

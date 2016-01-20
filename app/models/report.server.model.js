@@ -62,7 +62,7 @@ var ReportSchema = new Schema({
 	},
 
 	contribution: {
-		type: Schema.Types.ObjectId, ref: 'Contribution'
+		type: Schema.Types.ObjectId, ref: 'contribution'
 	},
 
 	international: {

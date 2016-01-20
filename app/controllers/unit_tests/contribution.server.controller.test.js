@@ -58,13 +58,33 @@ describe('Mongoose', function() {
         section.updateDoc('MySchema', {name: 'Tom Sawyer'}, mockReq, mockRes);
     });
 
+    describe('Route Middleware Tests', function() {
+        it('name() should return true if the section exists, and false otherwise', function(done) {
+            function nameShould(exist, name, done) {
+                section.nameFunction(name, function(doesExist) {
+                    should.equal(exist, doesExist);
+                    done();
+                });
+            }
+
+            nameShould(true, 'MySchema', function() {
+                nameShould(false, 'thisSectionDoesNotExist', done);
+            });
+        });
+
+        it('id() should return true if  ', function(done) {
+           //section.id(id, )
+            should.fail();
+            done();
+        });
+    });
+
     afterEach(function() {
         section.removeModel('MySchema');
     });
 });
 
 describe('Error Tests', function() {
-
     var mockReq = {
         jsonp: function(obj) { return obj; }
     };
@@ -92,3 +112,6 @@ describe('Error Tests', function() {
         done();
     });
 });
+
+
+

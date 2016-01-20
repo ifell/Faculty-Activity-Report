@@ -6,7 +6,7 @@
 var should = require('should'),
 	assert = require('assert'),
 	mongoose = require('mongoose'),
-	Contribution = mongoose.model('Contribution');
+	Contribution = mongoose.model('contribution');
 
 /**
  * Globals

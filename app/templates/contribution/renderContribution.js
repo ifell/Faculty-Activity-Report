@@ -3,7 +3,7 @@
 var mongoose = require('mongoose');
 
 // Compile Schema into Model here
-var Contribution = mongoose.model('Contribution');
+var Contribution = mongoose.model('contribution');
 
 var modelClass = require('../modelClass');
 var renderModel = new modelClass.RenderModel( Contribution, 'contribution/contribution.tex', 'contribution/na.tex');

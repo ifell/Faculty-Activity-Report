@@ -20,6 +20,6 @@ var Contribution = new Schema({
 		type: Schema.ObjectId,
 		ref: 'Report'
 	}
-}, {collection:'Contribution'});
+}, {collection:'contribution'});
 
-mongoose.model('Contribution', Contribution);
+mongoose.model('contribution', Contribution);

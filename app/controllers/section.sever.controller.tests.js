@@ -10,7 +10,7 @@ var request = require('supertest');
 var	section = require('./section.server.controller.js');
 
 var mongoose = require('mongoose');
-var Contribution = mongoose.model('Contribution');
+var Contribution = mongoose.model('contribution');
 
 var User = mongoose.model('User');
 var Report = mongoose.model('Report');
