@@ -5,7 +5,7 @@ module.exports = function(app) {
 	var contribution = require('../../app/controllers/contribution/contribution');
 	var reports = require('../../app/controllers/reports');
 
-    var section = require('../../app/controllers/section');
+    var section = require('../../app/controllers/section.server.controller.js');
 
 	app.route('/reports/:reportId/contribution')
 		.get(users.requiresLogin, reports.hasAuthorization, contribution.readFromReport)

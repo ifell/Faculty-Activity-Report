@@ -7,7 +7,7 @@ var is = require('is-js');
 
 var u = require('underscore');
 
-var section = require('../../app/controllers/section');
+var section = require('../section.server.controller.js');
 
 exports.create = function(req, res) {
 	if (is.empty(req.body.contribution))

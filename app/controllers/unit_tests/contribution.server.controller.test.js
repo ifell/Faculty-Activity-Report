@@ -1,14 +1,14 @@
 'use strict';
 
 var should = require('should');
-var	contribution = require('../../controllers/contribution/contribution');
+var	section = require('../../controllers/section.server.controller.js');
 
 describe('Mongoose', function() {
     var mongoose = require('mongoose'),
         Schema = mongoose.Schema;
 
     beforeEach(function() {
-        contribution.createModel('MySchema', {
+        section.createModel('MySchema', {
             name: {
                 type: String
             }
@@ -16,7 +16,7 @@ describe('Mongoose', function() {
     });
 
     it ('should be able to create a model', function(done) {
-        var MySchema = contribution.getModel('MySchema');
+        var MySchema = section.getModel('MySchema');
 
         should.equal(MySchema.schema.options.collection, 'MySchema');
         should.exist(MySchema.schema.tree.name);
@@ -33,7 +33,7 @@ describe('Mongoose', function() {
             }
         };
 
-        contribution.createDoc('MySchema', {name: 'Huck Finn'}, mockRes);
+        section.createDoc('MySchema', {name: 'Huck Finn'}, mockRes);
 
         done();
     });
@@ -55,11 +55,11 @@ describe('Mongoose', function() {
             }
         };
 
-        contribution.updateDoc('MySchema', {name: 'Tom Sawyer'}, mockReq, mockRes);
+        section.updateDoc('MySchema', {name: 'Tom Sawyer'}, mockReq, mockRes);
     });
 
     afterEach(function() {
-        contribution.removeModel('MySchema');
+        section.removeModel('MySchema');
     });
 });
 
@@ -70,7 +70,7 @@ describe('Error Tests', function() {
     };
 
     function run(inputObj) {
-        var error = contribution.errorJSON(mockReq, inputObj);
+        var error = section.errorJSON(mockReq, inputObj);
 
         if (inputObj.type) should.equal(error.type, inputObj.type + ': Does not exist');
         if (inputObj.message) should.equal(error.message, 'req.body.contribution was not ' + inputObj.message);
