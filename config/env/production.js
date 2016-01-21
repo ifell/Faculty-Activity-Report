@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = {
-	db: process.env.MONGOHQ_URL || process.env.MONGOLAB_URI || 'mongodb://localhost/far-prod',
+	db: process.env.MONGOHQ_URL || process.env.MONGOLAB_URI || 'mongodb://ifell:farifell@ds047075.mongolab.com:47075/far',
 	assets: {
 		lib: {
 			css: [

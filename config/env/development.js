@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = {
-	db: 'mongodb://localhost/far-dev',
+	db: 'mongodb://ifell:farifell@ds047075.mongolab.com:47075/far',
 	app: {
 		title: 'UF Faculty Activity Report - Development Environment'
 	},
