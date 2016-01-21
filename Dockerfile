@@ -1,4 +1,4 @@
-FROM node:0.12
+FROM dockerfile/nodejs
 
 RUN apt-get update -qq && apt-get install -y build-essential
 RUN apt-get install -y texlive
