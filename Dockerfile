@@ -1,7 +1,7 @@
 FROM node:0.12
 
 RUN apt-get update -qq && apt-get install -y build-essential
-RUN apt-get install texlive
+RUN apt-get install -y texlive
 
 WORKDIR /home/FAR
 
