@@ -1,6 +1,7 @@
 FROM node:0.12
 
-MAINTAINER Matthias Luebken, matthias@catalyst-zero.com
+RUN apt-get update -qq && apt-get install -y build-essential
+RUN apt-get install texlive
 
 WORKDIR /home/FAR
 
