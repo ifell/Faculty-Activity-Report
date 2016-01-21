@@ -65,7 +65,7 @@ var errorJSON = exports.errorJSON = function(res, inputObj) {
 };
 
 exports.name = function(req, res, next, id) {
-    nameFunction(id, function(doesExist) {
+    nameHelper(id, function(doesExist) {
         if (doesExist)
             next();
         else
@@ -75,7 +75,31 @@ exports.name = function(req, res, next, id) {
     });
 };
 
-var nameFunction = exports.nameFunction = function(name, exists) {
+exports.id = function(req, res, next, id) {
+    idHelper(req.params.section, id, function(doc) {
+        if (doc) {
+            req[req.params.section] = doc;
+            next();
+        } else
+            return res.status(404).send({
+                message: 'Doc was not found'
+            });
+    });
+};
+
+var idHelper = exports.idHelper = function(name, id, docCallback) {
+    getModel(name).findById(id)
+        .populate('user', 'displayName')
+        .populate('report', 'reportName')
+        .exec(function(err, doc) {
+            if (err || !doc)
+                docCallback(undefined);
+            else
+                docCallback(doc);
+        });
+};
+
+var nameHelper = exports.nameHelper = function(name, exists) {
     mongoose.connection.db.listCollections({name: name})
         .next(function (err, section) {
             if (section)

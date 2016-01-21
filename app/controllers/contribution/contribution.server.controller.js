@@ -43,18 +43,6 @@ exports.read = function(req, res) {
 	res.jsonp(req.contribution);
 };
 
-exports.contributionById = function(req, res, next, id) {
-	Contribution.findById(id)
-	.populate('user', 'displayName')
-	.populate('report', 'reportName')
-	.exec(function(err, contribution) {
-		if (err) return next(err);
-		if (!contribution) return next(new Error('Failed to load Contribution ' + id));
-		req.contribution = contribution;
-		next();
-	});
-};
-
 exports.hasAuthorization = function(req, res, next) {
 	if (req.contribution.user.id !== req.user.id && !u.contains(req.user.roles, 'admin')) {
 		return res.status(403).send({

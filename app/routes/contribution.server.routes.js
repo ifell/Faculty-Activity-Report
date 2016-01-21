@@ -11,12 +11,11 @@ module.exports = function(app) {
 		.get(users.requiresLogin, reports.hasAuthorization, contribution.readFromReport)
 		.post(users.requiresLogin, reports.hasAuthorization, contribution.create);
 
-	app.route('/:section/:contributionId')
+	app.route('/:section/:sectionId')
 		.get(users.requiresLogin, contribution.hasAuthorization, contribution.read)
 		.put(users.requiresLogin, contribution.hasAuthorization, contribution.update);
 
 	// Finish by binding the Contribution middleware
-	app.param('contributionId', contribution.contributionById);
     app.param('section', section.name);
-    //app.param('sectionId', section.id);
+    app.param('sectionId', section.id);
 };

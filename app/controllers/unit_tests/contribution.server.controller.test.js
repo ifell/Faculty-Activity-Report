@@ -8,7 +8,7 @@ describe('Mongoose', function() {
         Schema = mongoose.Schema;
 
     beforeEach(function() {
-        section.createModel('MySchema', {
+        section.createModel('mySchema', {
             name: {
                 type: String
             }
@@ -16,9 +16,9 @@ describe('Mongoose', function() {
     });
 
     it ('should be able to create a model', function(done) {
-        var MySchema = section.getModel('MySchema');
+        var MySchema = section.getModel('mySchema');
 
-        should.equal(MySchema.schema.options.collection, 'MySchema');
+        should.equal(MySchema.schema.options.collection, 'mySchema');
         should.exist(MySchema.schema.tree.name);
         should.exist(MySchema.schema.tree.id);
 
@@ -33,7 +33,7 @@ describe('Mongoose', function() {
             }
         };
 
-        section.createDoc('MySchema', {name: 'Huck Finn'}, mockRes);
+        section.createDoc('mySchema', {name: 'Huck Finn'}, mockRes);
 
         done();
     });
@@ -55,32 +55,46 @@ describe('Mongoose', function() {
             }
         };
 
-        section.updateDoc('MySchema', {name: 'Tom Sawyer'}, mockReq, mockRes);
+        section.updateDoc('mySchema', {name: 'Tom Sawyer'}, mockReq, mockRes);
     });
 
     describe('Route Middleware Tests', function() {
         it('name() should return true if the section exists, and false otherwise', function(done) {
             function nameShould(exist, name, done) {
-                section.nameFunction(name, function(doesExist) {
+                section.nameHelper(name, function(doesExist) {
                     should.equal(exist, doesExist);
                     done();
                 });
             }
 
-            nameShould(true, 'MySchema', function() {
+            nameShould(true, 'mySchema', function() {
                 nameShould(false, 'thisSectionDoesNotExist', done);
             });
         });
 
-        it('id() should return true if  ', function(done) {
-           //section.id(id, )
-            should.fail();
-            done();
+        it('id() should return a document given the collection and a valid id', function(done) {
+            var mockRes = {
+                jsonp: function(obj) {
+                    section.idHelper('mySchema', obj._id, function(doc) {
+                        done();
+                    });
+                }
+            };
+
+            section.createDoc('mySchema', {name: 'Huck Finn'}, mockRes);
         });
+
+        it('id() return undefined given an invalid id', function(done) {
+            section.idHelper('mySchema', 0, function(doc) {
+                should.equal(undefined, doc);
+                done();
+            });
+        });
+
     });
 
     afterEach(function() {
-        section.removeModel('MySchema');
+        section.removeModel('mySchema');
     });
 });
 
