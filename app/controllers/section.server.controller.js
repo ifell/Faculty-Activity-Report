@@ -3,7 +3,8 @@
 var mongoose = require('mongoose'),
     Schema = mongoose.Schema;
 
-var Contribution = mongoose.model('contribution');
+var u = require('underscore');
+
 var _ = require('lodash');
 
 exports.createModel = function(modelName, definitions) {
@@ -58,7 +59,7 @@ var errorJSON = exports.errorJSON = function(res, inputObj) {
     var errorObj = {};
 
     if (inputObj.type) errorObj.type = inputObj.type + ': Does not exist';
-    if (inputObj.message) errorObj.message = 'req.body.contribution was not ' + inputObj.message;
+    if (inputObj.message) errorObj.message = 'req.body.section was not ' + inputObj.message;
     if (inputObj.changed) errorObj.changed = 'Nothing ' + inputObj.changed;
 
     return res.jsonp(errorObj);
@@ -107,4 +108,8 @@ var nameHelper = exports.nameHelper = function(name, exists) {
             else
                 exists(false);
         });
+};
+
+exports.hasAuthorizationHelper = function(creatorsId, accessorsId, accessorsRoles) {
+    return creatorsId === accessorsId || u.contains(accessorsRoles, 'admin');
 };

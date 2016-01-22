@@ -1,34 +1,28 @@
 'use strict';
 
-var mongoose = require('mongoose');
-var Contribution = mongoose.model('contribution');
-
 var is = require('is-js');
-
-var u = require('underscore');
-
 var section = require('../section.server.controller.js');
 
 exports.create = function(req, res) {
-	if (is.empty(req.body.contribution))
+	if (is.empty(req.body[req.params.section]))
 		return section.errorJSON(res, {type: 'Post', message: 'sent', changed: 'Created'});
 
-	return section.createDoc('contribution', {
-        info: req.body.contribution.info,
+	return section.createDoc(req.params.section, {
+        info: req.body[req.params.section].info,
         user: req.user,
         report: req.report
     }, res);
 };
 
 exports.update = function(req, res) {
-	if (is.empty(req.body.contribution))
+	if (is.empty(req.body[req.params.section]))
 		return section.errorJSON(res, {type: 'Put', message: 'sent', changed: 'Updated'});
 
-	return section.updateDoc('contribution', req.body.contribution, req, res);
+	return section.updateDoc(req.params.section, req.body[req.params.section], req, res);
 };
 
 exports.readFromReport = function(req, res) {
-	Contribution.findOne({report: req.report})
+	section.getModel(req.params.section).findOne({report: req.report})
 	.populate('user', 'displayName')
 	.populate('report', 'reportName')
 	.exec(function(err, result) {
@@ -40,14 +34,14 @@ exports.readFromReport = function(req, res) {
 };
 
 exports.read = function(req, res) {
-	res.jsonp(req.contribution);
+	res.jsonp(req[req.params.section]);
 };
 
 exports.hasAuthorization = function(req, res, next) {
-	if (req.contribution.user.id !== req.user.id && !u.contains(req.user.roles, 'admin')) {
-		return res.status(403).send({
-			message: 'User is not authorized'
-		});
-	}
-	next();
+    if (!section.hasAuthorizationHelper(req[req.params.section].user.id, req.user.id, req.user.roles))
+        return res.status(403).send({
+            message: 'User is not authorized'
+        });
+    else
+        next();
 };

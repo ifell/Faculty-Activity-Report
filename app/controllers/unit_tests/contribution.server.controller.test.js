@@ -98,6 +98,15 @@ describe('Mongoose', function() {
     });
 });
 
+describe('Section MiddleWare Tests', function() {
+    it('should return true if the user can access the section, false otherwise', function(done) {
+        should.equal(true, section.hasAuthorizationHelper('1', '1', []));
+        should.equal(false, section.hasAuthorizationHelper('1', '2', []));
+        should.equal(true, section.hasAuthorizationHelper('1', '2', ['admin']));
+        done();
+    });
+});
+
 describe('Error Tests', function() {
     var mockReq = {
         jsonp: function(obj) { return obj; }
@@ -107,7 +116,7 @@ describe('Error Tests', function() {
         var error = section.errorJSON(mockReq, inputObj);
 
         if (inputObj.type) should.equal(error.type, inputObj.type + ': Does not exist');
-        if (inputObj.message) should.equal(error.message, 'req.body.contribution was not ' + inputObj.message);
+        if (inputObj.message) should.equal(error.message, 'req.body.section was not ' + inputObj.message);
         if (inputObj.changed) should.equal(error.changed, 'Nothing ' + inputObj.changed);
     }
 
