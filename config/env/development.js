@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = {
-	db: 'mongodb://localhost/far-dev',
+	db: process.env.MONGO_URI || 'mongodb://localhost/far-dev',
 	app: {
 		title: 'UF Faculty Activity Report - Development Environment'
 	},
